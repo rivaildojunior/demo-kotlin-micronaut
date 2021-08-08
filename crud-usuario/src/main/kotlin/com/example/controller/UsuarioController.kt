@@ -2,18 +2,22 @@ package com.example.controller
 
 import com.example.model.Usuario
 import com.example.service.UsuarioService
+import io.micronaut.data.model.Page
+import io.micronaut.data.model.Pageable
+import io.micronaut.http.HttpResponse
+
 import io.micronaut.http.annotation.*
-import javax.inject.Inject
+import io.micronaut.http.uri.UriBuilder
+import java.net.URI
 
 @Controller("/usuarios")
-class UsuarioController {
-
-    @Inject
-    lateinit var usuarioService: UsuarioService
+class UsuarioController(val usuarioService: UsuarioService) {
 
     @Post
-    fun save(@Body usuario: Usuario): Usuario {
-        return usuarioService.save(usuario)
+    fun save(@Body usuario: Usuario): HttpResponse<Usuario> {
+        val usuarioSalvo: Usuario = usuarioService.save(usuario)
+        val uri: URI = UriBuilder.of("/usuarios/${usuarioSalvo.id}").build()
+        return HttpResponse.created(usuarioSalvo, uri)
     }
 
     @Get("/{id}")
@@ -22,17 +26,18 @@ class UsuarioController {
     }
 
     @Delete("/{id}")
-    fun deleteById(@PathVariable id: Long): Boolean {
-        return usuarioService.deleteById(id)
+    fun deleteById(@PathVariable id: Long): HttpResponse<Unit> {
+        usuarioService.deleteById(id)
+        return HttpResponse.noContent();
     }
 
     @Get
-    fun findAll(): Iterable<Usuario> {
-        return usuarioService.findAll()
+    fun findAll(@QueryValue nome: String?, paginacao: Pageable): Page<Usuario> {
+        return usuarioService.findAll(nome, paginacao)
     }
 
     @Put("/{id}")
-    fun update(@Body usuario: Usuario, @PathVariable id: Long): Usuario {
-        return usuarioService.update(usuario, id)
+    fun update(@Body usuario: Usuario, @PathVariable id: Long): HttpResponse<Usuario> {
+        return HttpResponse.ok(usuarioService.update(usuario, id))
     }
 }

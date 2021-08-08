@@ -1,15 +1,14 @@
 package com.example.service
 
+import com.example.exception.RegistroNaoEncontradoException
 import com.example.model.Usuario
 import com.example.repository.UsuarioRepository
-import javax.inject.Inject
+import io.micronaut.data.model.Page
+import io.micronaut.data.model.Pageable
 import javax.inject.Singleton
 
 @Singleton
-class UsuarioService {
-
-    @Inject
-    open lateinit var usuarioRepository: UsuarioRepository
+open class UsuarioService(val usuarioRepository: UsuarioRepository) {
 
     open fun save(usuario: Usuario): Usuario {
         usuarioRepository.save(usuario)
@@ -17,21 +16,22 @@ class UsuarioService {
     }
 
     open fun findById(id: Long): Usuario {
-        return usuarioRepository.findById(id).orElse(null)
+        return usuarioRepository.findById(id)
+                .orElseThrow{RegistroNaoEncontradoException("Registro não encontrado")}
     }
 
-    open fun deleteById(id: Long): Boolean {
-        try {
-            usuarioRepository.deleteById(id)
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
+    open fun deleteById(id: Long): Unit {
+        var usuarioDB: Usuario = findById(id);
+        return usuarioRepository.delete(usuarioDB)
+    }
+
+    open fun findAll(nome: String?, paginacao: Pageable): Page<Usuario> {
+        var lista = if (nome == null){
+            usuarioRepository.findAll(paginacao)
+        } else {
+            usuarioRepository.findByNome(nome, paginacao)
         }
-    }
-
-    open fun findAll(): Iterable<Usuario> {
-        return usuarioRepository.findAll()
+        return lista
     }
 
     open fun update(usuario: Usuario, id: Long): Usuario {
