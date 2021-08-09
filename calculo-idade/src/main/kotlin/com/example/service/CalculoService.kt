@@ -2,7 +2,6 @@ package com.example.service
 
 import com.example.http.UsuarioHttp
 import com.example.model.Usuario
-import java.net.http.HttpClient
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject

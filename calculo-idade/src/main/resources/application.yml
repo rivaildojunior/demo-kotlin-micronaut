@@ -1,5 +1,12 @@
 micronaut:
   application:
-    name: calculoIdade
+    name: calculo
   server:
     port: 8081
+
+consul:
+  client:
+    registration:
+      enabled: true
+    defaultZone: "${CONSUL_HOST:localhost}:${CONSUL_PORT:8500}"
+
